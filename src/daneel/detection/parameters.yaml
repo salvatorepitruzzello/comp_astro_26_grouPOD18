@@ -1,0 +1,17 @@
+transit:
+  planet_name: K2-18b
+  t0: 0.0            # time of inferior conjunction [days]
+  per: 32.940045     # orbital period [days]
+  rp: 0.05375        # planet radius [stellar radii]
+  a: 83.33           # semi-major axis [stellar radii]
+  inc: 89.5785       # orbital inclination [deg]
+  ecc: 0.20          # eccentricity
+  w: -5.70           # longitude of periastron [deg]
+  limb_darkening:    # model: coefficients
+    uniform: []
+    linear: [0.3]
+    quadratic: [0.1, 0.3]
+    nonlinear: [0.5, 0.1, 0.1, -0.1]
+  t_min: -0.1        # time window [days from mid-transit]
+  t_max: 0.1
+  n_points: 1000

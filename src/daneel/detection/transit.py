@@ -1,43 +1,104 @@
-import batman
-import numpy as np
+import importlib
+
 import matplotlib.pyplot as plt
+import numpy as np
+import setuptools  # noqa: F401  # Provides distutils compatibility for batman.
 
-params = batman.TransitParams()       # object to store transit parameters
-params.t0 = 0.                        # time of inferior conjunction
-params.per = 32.940045                # orbital period
-params.rp = 0.05375                   # planet radius (in units of stellar radii)
-params.a = 83.33                      # semi-major axis (in units of stellar radii)
-params.inc = 89.5785                  # orbital inclination (in degrees)
-params.ecc = 0.20                     # eccentricity
-params.w = - 5.70                     # longitude of periastron (in degrees)
-params.limb_dark = "nonlinear"        # limb darkening model
-params.u = [0.5, 0.1, 0.1, -0.1]      # limb darkening coefficients [u1, u2, u3, u4]
+batman = importlib.import_module("batman")
 
-t = np.linspace(-0.1, 0.1, 1000)      # times at which to calculate light curve
-m = batman.TransitModel(params, t)    # initializes model
-flux = m.light_curve(params)          # calculates light curve
 
-radii = np.linspace(0.09, 0.11, 20)
-for r in radii:
-        params.rp = r                 # updates planet radius
-        new_flux = m.light_curve(params) # recalculates light curve
+class TransitModel:
+    """
+    Transit light curve of a planet computed with batman, for one or more
+    limb darkening models.
 
-params.rp = 0.05375 
+    The parameters are read from the "transit" section of the YAML file
+    passed to daneel with -i.
+    """
 
-ld_options = ["uniform", "linear", "quadratic", "nonlinear"]
-ld_coefficients = [[], [0.3], [0.1, 0.3], [0.5, 0.1, 0.1, -0.1]]
+    def __init__(self, params_dict):
+        """
+        Parameters
+        ----------
+        params_dict : dict
+            Transit parameters loaded from the YAML file
+        """
+        self.name = params_dict.get("planet_name", "planet")
 
-plt.figure()
+        self.params = batman.TransitParams()
+        self.params.t0 = params_dict.get("t0", 0.0)
+        self.params.per = params_dict["per"]
+        self.params.rp = params_dict["rp"]
+        self.params.a = params_dict["a"]
+        self.params.inc = params_dict["inc"]
+        self.params.ecc = params_dict.get("ecc", 0.0)
+        self.params.w = params_dict.get("w", 90.0)
 
-for i in range(4):
-        params.limb_dark = ld_options[i]          # specifies the LD profile
-        params.u = ld_coefficients[i]             # updates LD coefficients
-        m = batman.TransitModel(params, t)        # initializes the model
-        flux = m.light_curve(params)              # calculates light curve
-        plt.plot(t, flux, label = ld_options[i])
+        # Limb darkening: several models from "limb_darkening",
+        # or a single model from "limb_dark" and "u"
+        if "limb_darkening" in params_dict:
+            self.limb_darkening = params_dict["limb_darkening"]
+        else:
+            self.limb_darkening = {
+                params_dict.get("limb_dark", "quadratic"): params_dict.get("u", [0.1, 0.3])
+            }
 
-plt.legend()
-plt.xlabel("Time [days]")
-plt.ylabel("Relative flux")
-plt.title("Transit Light Curve K2-18b")
-plt.savefig("K2-18b_assignment1_taskF.png")
+        # Time array for model evaluation [days from mid-transit]
+        self.t = np.linspace(
+            params_dict.get("t_min", -0.1),
+            params_dict.get("t_max", 0.1),
+            params_dict.get("n_points", 1000),
+        )
+
+    def compute_light_curve(self):
+        """
+        Compute the light curve for each limb darkening model.
+
+        Returns
+        -------
+        flux : dict
+            Relative flux array for each limb darkening model
+        """
+        self.flux = {}
+        for model, coefficients in self.limb_darkening.items():
+            self.params.limb_dark = model
+            self.params.u = coefficients
+            # batman requires a new model whenever the limb darkening law changes
+            m = batman.TransitModel(self.params, self.t)
+            self.flux[model] = m.light_curve(self.params)
+        return self.flux
+
+    def plot_light_curve(self, output_file="lc.png", show=False):
+        """
+        Plot and save the transit light curves.
+
+        Parameters
+        ----------
+        output_file : str, optional
+            Output filename for the plot (default: 'lc.png')
+        show : bool, optional
+            Also display the plot on screen (default: False)
+        """
+        if not hasattr(self, "flux"):
+            self.compute_light_curve()
+
+        fig, ax = plt.subplots(figsize=(10, 6))
+        for model, flux in self.flux.items():
+            ax.plot(self.t, flux, label=model)
+        ax.set(
+            xlabel="Time [days]",
+            ylabel="Relative flux",
+            title=f"{self.name} transit light curve",
+        )
+        ax.legend(title="Limb darkening")
+        fig.tight_layout()
+        fig.savefig(output_file, dpi=150)
+        if show:
+            plt.show()
+        plt.close(fig)
+        print(f"Light curve saved to {output_file}")
+
+    def run(self, output_file="lc.png"):
+        """Compute and plot the transit light curve."""
+        self.compute_light_curve()
+        self.plot_light_curve(output_file)

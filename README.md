@@ -75,6 +75,21 @@ daneel -i src/daneel/detection/parameters.yaml -t -o K2-18b_transit.png
 If `-o` is omitted, the plot is saved as `lc.png`. An existing file with the
 same name is overwritten.
 
+### Running daneel outside the repository
+
+Since `daneel` is installed as a package, it can be run from any directory.
+Parameter files and outputs should be kept in a separate working directory,
+outside the Git repository, so that runs do not modify the code base:
+
+```bash
+mkdir run_daneel
+cd run_daneel
+daneel -i path_to_the_parameters.yaml -t
+```
+
+Paths given to `-i` and `-o` are relative to the current directory, so the
+output plot is saved in the working directory.
+
 ## Input File Format
 
 The input file should be a YAML file containing the necessary parameters for the analysis.

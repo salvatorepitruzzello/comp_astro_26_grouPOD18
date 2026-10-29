@@ -1,5 +1,8 @@
 # Daneel — Computational Astrophysics 2026–27
 
+**Group repository:** `comp_astro_26_grouPOD18`, a.k.a. **CATASTROPHE** —
+*Chasing Another Transit: ASTROnomers Pursue Hypothetical Exoplanets*.
+
 A teaching package for modelling exoplanet transits and building detection
 pipelines. The repository contains the course example code, a runnable CLI,
 and Sphinx documentation.

@@ -1,41 +1,20 @@
 import importlib
-
 import matplotlib.pyplot as plt
 import numpy as np
-import setuptools  # noqa: F401  # Provides distutils compatibility for batman.
+import setuptools  # noqa: F401
 
 batman = importlib.import_module("batman")
 
-
 class TransitModel:
     """
-    Transit light curve of a planet computed with batman, for one or more
-    limb darkening models.
-
-    The parameters are read from the "transit" section of the YAML file
-    passed to daneel with -i.
+    Transit light curve computed with batman for multiple planets, 
+    for one or more limb darkening models.
     """
 
     def __init__(self, params_dict):
-        """
-        Parameters
-        ----------
-        params_dict : dict
-            Transit parameters loaded from the YAML file
-        """
-        self.name = params_dict.get("planet_name", "planet")
+        
+        self.planets = params_dict.get("planets", {})
 
-        self.params = batman.TransitParams()
-        self.params.t0 = params_dict.get("t0", 0.0)
-        self.params.per = params_dict["per"]
-        self.params.rp = params_dict["rp"]
-        self.params.a = params_dict["a"]
-        self.params.inc = params_dict["inc"]
-        self.params.ecc = params_dict.get("ecc", 0.0)
-        self.params.w = params_dict.get("w", 90.0)
-
-        # Limb darkening: several models from "limb_darkening",
-        # or a single model from "limb_dark" and "u"
         if "limb_darkening" in params_dict:
             self.limb_darkening = params_dict["limb_darkening"]
         else:
@@ -43,7 +22,7 @@ class TransitModel:
                 params_dict.get("limb_dark", "quadratic"): params_dict.get("u", [0.1, 0.3])
             }
 
-        # Time array for model evaluation [days from mid-transit]
+        # Time array, days from mid transit
         self.t = np.linspace(
             params_dict.get("t_min", -0.1),
             params_dict.get("t_max", 0.1),
@@ -52,53 +31,60 @@ class TransitModel:
 
     def compute_light_curve(self):
         """
-        Compute the light curve for each limb darkening model.
-
-        Returns
-        -------
-        flux : dict
-            Relative flux array for each limb darkening model
+        Compute the light curve for each planet and each limb darkening model.
         """
         self.flux = {}
-        for model, coefficients in self.limb_darkening.items():
-            self.params.limb_dark = model
-            self.params.u = coefficients
-            # batman requires a new model whenever the limb darkening law changes
-            m = batman.TransitModel(self.params, self.t)
-            self.flux[model] = m.light_curve(self.params)
+        
+        for planet_name, p_params in self.planets.items():
+            self.flux[planet_name] = {}
+            
+            params = batman.TransitParams()
+            params.t0 = p_params.get("t0", 0.0)
+            params.per = p_params["per"]
+            params.rp = p_params["rp"]
+            params.a = p_params["a"]
+            params.inc = p_params["inc"]
+            params.ecc = p_params.get("ecc", 0.0)
+            params.w = p_params.get("w", 90.0)
+
+            # limb darkening models
+            for model, coefficients in self.limb_darkening.items():
+                params.limb_dark = model
+                params.u = coefficients
+                m = batman.TransitModel(params, self.t)
+                self.flux[planet_name][model] = m.light_curve(params)
+                
         return self.flux
 
     def plot_light_curve(self, output_file="lc.png", show=False):
-        """
-        Plot and save the transit light curves.
-
-        Parameters
-        ----------
-        output_file : str, optional
-            Output filename for the plot (default: 'lc.png')
-        show : bool, optional
-            Also display the plot on screen (default: False)
-        """
+        """Plot and save the transit light curves for all planets."""
         if not hasattr(self, "flux"):
             self.compute_light_curve()
 
         fig, ax = plt.subplots(figsize=(10, 6))
-        for model, flux in self.flux.items():
-            ax.plot(self.t, flux, label=model)
+        
+        for planetk, models in self.flux.items():
+            planet_name = self.planets[planetk].get("planet_name", planetk)
+            
+            for model, flux in models.items():
+                label = f"{planet_name} ({model})" if len(self.limb_darkening) > 1 else planet_name
+                ax.plot(self.t, flux, label=label)
+
         ax.set(
             xlabel="Time [days]",
             ylabel="Relative flux",
-            title=f"{self.name} transit light curve",
+            title="Transit Light Curves for multiple planets",
         )
-        ax.legend(title="Limb darkening")
+        ax.legend(title="Planet + LD Model")
         fig.tight_layout()
         fig.savefig(output_file, dpi=150)
+        
         if show:
             plt.show()
         plt.close(fig)
-        print(f"Light curve saved to {output_file}")
+        print(f"Light curves saved to {output_file}")
 
     def run(self, output_file="lc.png"):
-        """Compute and plot the transit light curve."""
+        
         self.compute_light_curve()
         self.plot_light_curve(output_file)

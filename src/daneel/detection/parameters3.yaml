@@ -1,0 +1,36 @@
+
+transit:
+  planets:
+    Pianeta_B:
+      planet_name: LHS 1140 b
+      t0: 0.0
+      per: 24.7369148
+      rp: 0.07390
+      a: 95.34
+      inc: 89.89
+      ecc: 0.0
+      w: 0.0
+    Pianeta_C:
+      planet_name: LHS 1140 c
+      t0: 0.0
+      per: 24.7369148
+      rp: 0.03695
+      a: 95.34
+      inc: 89.89
+      ecc: 0.0
+      w: 0.0
+    Pianeta_D:
+      planet_name: LHS 1140 d
+      t0: 0.0
+      per: 24.7369148
+      rp: 0.14780
+      a: 95.34
+      inc: 89.89
+      ecc: 0.0
+      w: 0.0
+  limb_darkening:  
+    uniform: []  
+    quadratic: [0.061, 0.172]
+  t_min: -0.1
+  t_max: 0.1
+  n_points: 1000

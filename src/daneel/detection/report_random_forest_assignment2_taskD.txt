@@ -1,0 +1,91 @@
+
+Task D.
+
+Evaluation Split: 80% Train / 20% Test
+
+Configuration 1 (original)
+
+n_estimators = 500
+depth = None
+
+Confusion Matrix
+
+37.0 13.2 
+0.5 49.2
+
+              precision    recall  f1-score   support
+
+  Non-Planet     0.9859    0.7368    0.8434        95
+      Planet     0.7881    0.9894    0.8774        94
+
+    accuracy                         0.8624       189
+   macro avg     0.8870    0.8631    0.8604       189
+weighted avg     0.8875    0.8624    0.8603       189
+
+
+Configuration 2 (scoring="average_precision"):
+
+n_estimators = 500
+depth = 9
+
+Confusion Matrix
+
+37.6 12.7
+0.5 49.2
+
+              precision    recall  f1-score   support
+
+  Non-Planet     0.9861    0.7474    0.8503        95
+      Planet     0.7949    0.9894    0.8815        94
+
+    accuracy                         0.8677       189
+   macro avg     0.8905    0.8684    0.8659       189
+weighted avg     0.8910    0.8677    0.8658       189
+
+
+Configuration 3 (scoring="precision"):
+
+n_estimators = 50
+depth = None
+
+Confusion Matrix
+
+39.7 10.6 
+2.6 47.1
+
+              precision    recall  f1-score   support
+
+  Non-Planet     0.9375    0.7895    0.8571        95
+      Planet     0.8165    0.9468    0.8768        94
+
+    accuracy                         0.8677       189
+   macro avg     0.8770    0.8681    0.8670       189
+weighted avg     0.8773    0.8677    0.8669       189
+
+
+Configuration 4 (scoring="f1"):
+
+n_estimators = 100
+depth = 12
+
+Confusion Matrix
+
+38.6 11.6 
+1.6 48.1
+
+              precision    recall  f1-score   support
+
+  Non-Planet     0.9605    0.7684    0.8538        95
+      Planet     0.8053    0.9681    0.8792        94
+
+    accuracy                         0.8677       189
+   macro avg     0.8829    0.8683    0.8665       189
+weighted avg     0.8833    0.8677    0.8664       189
+
+Configuration 5 (scoring="recall"):
+
+n_estimators = 100
+depth = 12
+
+same as f1
+

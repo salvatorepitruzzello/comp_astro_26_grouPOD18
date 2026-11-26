@@ -1,0 +1,25 @@
+Task E: Decision Tree Classifier
+
+Hyperparameters:
+  criterion = 'gini'
+  max_depth = 10
+  min_samples_leaf = 20
+  random_state = 42
+
+Data split: identical to Task D (test_size=0.2, stratified, random_state=42,
+balanced augmentation on training set only)
+
+Confusion Matrix 
+
+[[37.  13.2]
+ [ 3.7 46. ]]
+
+Classification report (optimal threshold):
+              precision    recall  f1-score   support
+
+  Non-Planet     0.9091    0.7368    0.8140        95
+      Planet     0.7768    0.9255    0.8447        94
+
+    accuracy                         0.8307       189
+   macro avg     0.8429    0.8312    0.8293       189
+weighted avg     0.8433    0.8307    0.8292       189

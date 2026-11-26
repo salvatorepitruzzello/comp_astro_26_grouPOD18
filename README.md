@@ -78,6 +78,18 @@ daneel -i src/daneel/detection/parameters.yaml -t -o K2-18b_transit.png
 If `-o` is omitted, the plot is saved as `lc.png`. An existing file with the
 same name is overwritten.
 
+### Random-forest detection
+
+Run transit classification on TESS data:
+
+```bash
+daneel -i rf_params.yaml -d rf
+```
+
+The YAML file sets the dataset path, train/test split and classifier
+hyperparameters. Statistics are printed and written to
+the `output_dir` path.
+
 ### Running daneel outside the repository
 
 Since `daneel` is installed as a package, it can be run from any directory.

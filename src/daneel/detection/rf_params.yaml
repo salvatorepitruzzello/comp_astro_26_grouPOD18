@@ -1,0 +1,14 @@
+rf:
+  csv_path: "/ca26/comp_astro_26_grouPOD18/src/daneel/detection/Assignment2/tess_data.csv"
+  n_bins: 1000
+  use_scaler: false
+  samples_per_class: 350
+  test_size: 0.2
+  random_state: 42
+  n_estimators: 500
+  max_depth: 9
+  min_samples_leaf: 1
+  max_features: "sqrt"
+  output_dir: "."
+  save_plots: true
+  save_model: false
